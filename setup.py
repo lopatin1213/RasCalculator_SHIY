@@ -26,7 +26,7 @@ icon_path = "calculator.ico"      # Путь к иконке приложени�
 # Скрипт главного модуля
 # Ярлык в меню "Пуск"
 start_menu_shortcut = Executable(
-    script="tests.py",
+    script="The_mainest.py",
     base=base_executable,
     icon=icon_path,
     target_name="calculator.exe",
@@ -36,7 +36,7 @@ start_menu_shortcut = Executable(
 
 # Ярлык на рабочем столе
 desktop_shortcut = Executable(
-    script="tests.py",
+    script="The_mainest.py",
     base=base_executable,
     icon=icon_path,
     target_name="calculator.exe",

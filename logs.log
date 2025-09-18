@@ -1,0 +1,15 @@
+2025-09-19 19:05:43,076 - DEBUG - Starting new HTTP connection (1): www.google.com:80
+2025-09-19 19:05:43,156 - DEBUG - http://www.google.com:80 "HEAD / HTTP/1.1" 200 0
+2025-09-19 19:05:43,160 - DEBUG - Starting new HTTPS connection (1): rascalck.pythonanywhere.com:443
+2025-09-19 19:05:44,445 - DEBUG - https://rascalck.pythonanywhere.com:443 "GET /version/ HTTP/1.1" 200 10
+2025-09-19 19:05:44,463 - INFO - У вас установлена актуальная версия.
+2025-09-19 19:05:44,467 - INFO - Файл 'preferences.txt' прочитан: True, интерпретировано как: True
+2025-09-19 19:05:47,270 - INFO - Обучающее сообщение отображено.
+2025-09-19 19:05:47,288 - INFO - Файл конфигурации 'config.ini' успешно открыт.
+2025-09-19 19:05:52,661 - INFO - Файл 'preferences.txt' обновлён.
+2025-09-19 19:05:52,679 - INFO - Файл preferences2.txt прочитан: True, интерпретировано как: True
+2025-09-19 19:05:52,952 - DEBUG - STREAM b'IHDR' 16 13
+2025-09-19 19:05:52,953 - DEBUG - STREAM b'sRGB' 41 1
+2025-09-19 19:05:52,953 - DEBUG - STREAM b'gAMA' 54 4
+2025-09-19 19:05:52,953 - DEBUG - STREAM b'pHYs' 70 9
+2025-09-19 19:05:52,953 - DEBUG - STREAM b'IDAT' 91 12548

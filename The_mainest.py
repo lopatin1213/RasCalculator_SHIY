@@ -1197,7 +1197,7 @@ else:
 	                insertbackground='black', selectforeground=text_color, selectbackground='gray')
 	style.configure('Text', background=bg_color, foreground=contrast_color(bg_color))
 # Загружаем изображение
-img = Image.open("settings_icon.png")
+img = Image.open("Files/settings_icon.png")
 # Масштабируем изображение
 scaled_img = img.resize((30, 30), Image.Resampling.LANCZOS)
 # Конвертируем в PhotoImage

@@ -381,51 +381,57 @@ class StatisticUI(QWidget):
         
 from trinogremetric import *
 class TrigonometryUI(QWidget):
+    
     def __init__(self):
-        super().__init__()
+        try:
+            super().__init__()
 
-        cord_x = 0
-        cord_y = 220
-        self.label_trig_text = QLabel(parent=self, text="Введите угол синус, косинус или тангенс которого вы хотите найти:")
-        self.label_trig_text.move(cord_x, cord_y)
+            cord_x = 0
+            cord_y = 220
+            self.label_trig_text = QLabel(parent=self, text="Введите угол синус, косинус или тангенс которого вы хотите найти:")
+            self.label_trig_text.move(cord_x, cord_y)
 
-        self.trig_input = QLineEdit(self)
-        self.trig_input.move(cord_x, cord_y + 20)
+            self.trig_input = QLineEdit(self)
+            self.trig_input.move(cord_x, cord_y + 20)
 
-        self.sin_button = QPushButton(parent=self, text="sin")
-        self.sin_button.move(cord_x, cord_y + 40)
+            self.sin_button = QPushButton(parent=self, text="sin")
+            self.sin_button.move(cord_x, cord_y + 40)
 
-        self.cos_button = QPushButton(parent=self, text="cos")
-        self.cos_button.move(cord_x + 100, cord_y + 40)
+            self.cos_button = QPushButton(parent=self, text="cos")
+            self.cos_button.move(cord_x + 100, cord_y + 40)
 
-        self.tan_button = QPushButton(parent=self, text="tan")
-        self.tan_button.move(cord_x + 200, cord_y + 40)
-        self.arcsin_button = QPushButton(parent=self, text="arcsin")
-        self.arcsin_button.move(cord_x + 200, cord_y + 60)
-        self.arccos_button = QPushButton(parent=self, text="arccos")
-        self.arccos_button.move(cord_x + 200, cord_y + 80)
-        self.arctan_button = QPushButton(parent=self, text='arctan')
-        self.trig_output = QLineEdit(self)
-        self.trig_output.setReadOnly(True)
-        self.trig_output.move(cord_x + 135, cord_y + 20)
-        self.trig_output.resize(1000, 30)
-        
-        self.box = QVBoxLayout(self)
-        self.box.addWidget(self.label_trig_text)
-        self.box.addWidget(self.trig_input)
-        self.box.addWidget(self.sin_button)
-        self.box.addWidget(self.cos_button)
-        self.box.addWidget(self.tan_button)
-        self.box.addWidget(self.arcsin_button)
-        self.box.addWidget(self.arccos_button)
-        self.box.addWidget(self.arctan_button)
-        self.box.addWidget(self.trig_output)
-        self.sin_button.clicked.connect(lambda: self.on_click('sin'))
-        self.cos_button.clicked.connect(lambda: self.on_click('cos'))
-        self.tan_button.clicked.connect(lambda: self.on_click('tan'))
-        self.arcsin_button.clicked.connect(lambda: self.on_click('arcsin'))
-        self.arccos_button.clicked.connect(lambda: self.on_click('arccos'))
-        self.arctan_button.clicked.connect(lambda: self.on_click('arctan'))
+            self.tan_button = QPushButton(parent=self, text="tan")
+            self.tan_button.move(cord_x + 200, cord_y + 40)
+            self.arcsin_button = QPushButton(parent=self, text="arcsin")
+            self.arcsin_button.move(cord_x + 200, cord_y + 60)
+            self.arccos_button = QPushButton(parent=self, text="arccos")
+            self.arccos_button.move(cord_x + 200, cord_y + 80)
+            self.arctan_button = QPushButton(parent=self, text='arctan')
+            self.trig_output = QLineEdit(self)
+            self.trig_output.setReadOnly(True)
+            self.trig_output.move(cord_x + 135, cord_y + 20)
+            self.trig_output.resize(1000, 30)
+            self.ctg_button = QPushButton(parent=self, text='ctg')
+            self.box = QVBoxLayout(self)
+            self.box.addWidget(self.label_trig_text)
+            self.box.addWidget(self.trig_input)
+            self.box.addWidget(self.sin_button)
+            self.box.addWidget(self.cos_button)
+            self.box.addWidget(self.tan_button)
+            self.box.addWidget(self.ctg_button)
+            self.box.addWidget(self.arcsin_button)
+            self.box.addWidget(self.arccos_button)
+            self.box.addWidget(self.arctan_button)
+            self.box.addWidget(self.trig_output)
+            self.sin_button.clicked.connect(lambda: self.on_click('sin'))
+            self.cos_button.clicked.connect(lambda: self.on_click('cos'))
+            self.tan_button.clicked.connect(lambda: self.on_click('tan'))
+            self.ctg_button.clicked.connect(lambda: self.on_click('ctg'))
+            self.arcsin_button.clicked.connect(lambda: self.on_click('arcsin'))
+            self.arccos_button.clicked.connect(lambda: self.on_click('arccos'))
+            self.arctan_button.clicked.connect(lambda: self.on_click('arctan'))
+        except Exception as e:
+            print(e)
     def on_click(self, type):
         process_trigonometric_function(self, type)
 

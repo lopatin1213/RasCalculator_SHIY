@@ -65,7 +65,7 @@ options = {
         "upgrade_code": "{16666666-6667-6666-6666-666666666666}",  # Уникальный идентификатор обновления
         "add_to_path": False,  # Не добавлять в PATH
         'initial_target_dir': 'C:\\Antonrasrab',
-
+        
 
     }
 }

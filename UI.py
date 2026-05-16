@@ -574,5 +574,6 @@ if __name__ == '__main__':
     app.setWindowIcon(QIcon("calculator.ico"))
     window = NewApp()
     window.show()
+    print("Hello")
     app.aboutToQuit.connect(quit_from_app)
     sys.exit(app.exec())

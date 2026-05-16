@@ -3,7 +3,71 @@ from sympy import *
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
+import re
+import sympy
 
+def get_all_sympy_function_names():
+    """Собирает имена всех встроенных функций SymPy."""
+    names = set()
+    def collect(module):
+        for attr_name in dir(module):
+            if attr_name.startswith('_'):
+                continue
+            try:
+                attr = getattr(module, attr_name)
+            except Exception:
+                continue
+            if callable(attr) or isinstance(attr, type):
+                names.add(attr_name)
+            elif hasattr(attr, '__module__') and 'sympy.functions' in getattr(attr, '__module__', ''):
+                collect(attr)
+    collect(sympy.functions)
+    names.update(['sqrt', 'log', 'ln', 'Abs', 'sign', 'floor', 'ceiling'])
+    return names
+
+def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
+    """
+    Вставляет знаки умножения с учётом неявного умножения.
+    Поддерживает латиницу и кириллицу в именах переменных.
+    """
+    func_set = get_all_sympy_function_names()
+    if extra_functions:
+        func_set.update(extra_functions)
+
+    sorted_funcs = sorted(func_set, key=len, reverse=True)
+    func_pattern = '|'.join(re.escape(f) for f in sorted_funcs)
+
+    # Классы символов, включающие кириллицу
+    LETTER = r'[A-Za-zА-Яа-яёЁ_]'
+    LETTER_DIGIT = r'[\dA-Za-zА-Яа-яёЁ_]'
+
+    # Явно вставляем * между цифрой/буквой и функцией перед '('
+    expr = re.sub(rf'(\d)({func_pattern})(?=\()', r'\1*\2', expr)
+    expr = re.sub(rf'({LETTER})({func_pattern})(?=\()', r'\1*\2', expr)
+
+    # Защита функций (только латиница и подчёркивание) от разбиения
+    protected = {}
+    def protect(match):
+        name = match.group(0)
+        if name not in func_set:
+            return name
+        placeholder = f'\ue000{len(protected)}\ue001'
+        protected[placeholder] = name
+        return placeholder
+
+    expr = re.sub(r'[A-Za-z_]\w*', protect, expr)   # только латиница с подчёркиванием
+
+    # Основные правила с кириллицей
+    expr = re.sub(rf'(\d)({LETTER})', r'\1*\2', expr)                # 2x, 2я
+    expr = re.sub(rf'({LETTER})({LETTER})', r'\1*\2', expr)         # ab, ая
+    expr = re.sub(rf'({LETTER_DIGIT})(\()', r'\1*\2', expr)         # a(, 3(, я(
+    expr = re.sub(rf'(\))({LETTER_DIGIT}\()', r'\1*\2', expr)       # )a, )(, )я
+
+    # Возвращаем функции
+    for placeholder, name in protected.items():
+        expr = expr.replace(placeholder, name)
+
+    return expr
 def plot_linear_equation(a, b, c):
     """
     Строит график линейного уравнения ax + by + c = 0.
@@ -123,7 +187,8 @@ def solve_system_of_equations(window):
         for equation in equations_list:
             logging.info(f"Преобразование уравнения: {equation}")
             equation = equation.replace('=', '==')
-            equation = re.sub(r'(\d+)([A-Za-zА-ЯЁа-яё])', r'\1*\2', equation)
+            equation = insert_multiplication_signs(equation)
+            print(equation)
             lhs, rhs = equation.split('==')
             logging.info(str(lhs))
             logging.info(str(rhs))

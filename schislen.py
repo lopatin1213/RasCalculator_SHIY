@@ -37,6 +37,9 @@ def calculate_sch(window, type, ss):
             result = a+b
         elif type == "-":
             result = a-b
+            if result < 0:
+                window.label_sch_result.setText(f"{result} в 10 системе счисления, оно отрицательное")
+                return
         elif type == "*":
             result = a*b
         elif type == "/":

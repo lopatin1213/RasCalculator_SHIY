@@ -1,12 +1,9 @@
-2026-06-07 16:15:43,665 - INFO - ['D:\\RasCalculator\\UI.py']
-2026-06-07 16:15:43,671 - DEBUG - Starting new HTTPS connection (1): www.google.com:443
-2026-06-07 16:15:44,248 - DEBUG - https://www.google.com:443 "HEAD / HTTP/1.1" 200 0
-2026-06-07 16:15:44,256 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
-2026-06-07 16:15:44,912 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /version_check/ HTTP/1.1" 200 10
-2026-06-07 16:15:44,964 - INFO - У вас установлена актуальная версия.
-2026-06-07 16:15:44,968 - INFO - Файл 'preferences.txt' прочитан: False, интерпретировано как: False
-2026-06-07 16:15:44,968 - INFO - Это не первый запуск.
-2026-06-07 16:15:45,329 - INFO - <PyQt6.QtWidgets.QPushButton object at 0x000001D5768F87D0>
-2026-06-07 16:15:51,965 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
-2026-06-07 16:15:52,732 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /send_errors/ HTTP/1.1" 405 29
-2026-06-07 16:15:52,802 - DEBUG - https://rascalculator.alwaysdata.net:443 "POST /send_errors/ HTTP/1.1" 400 22
+2026-06-07 20:49:04,583 - INFO - ['D:\\RasCalculator\\UI.py']
+2026-06-07 20:49:04,613 - DEBUG - Starting new HTTPS connection (1): www.google.com:443
+2026-06-07 20:49:26,950 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
+2026-06-07 20:49:38,973 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /version_check/ HTTP/1.1" 200 10
+2026-06-07 20:49:39,029 - INFO - У вас установлена актуальная версия.
+2026-06-07 20:49:39,126 - INFO - Файл 'preferences.txt' прочитан: False, интерпретировано как: False
+2026-06-07 20:49:39,127 - INFO - Это не первый запуск.
+2026-06-07 20:49:40,765 - INFO - <PyQt6.QtWidgets.QPushButton object at 0x000001F3B63E07D0>
+2026-06-07 20:49:55,835 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443

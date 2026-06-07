@@ -205,10 +205,10 @@ def solve_system_of_equations(window):
         used_variables = set()  # Множество переменных, используемых в уравнениях
         for equation in equations_list:
             logging.info(f"Преобразование уравнения: {equation}")
-            equation = equation.replace('=', '==')
+            #equation = equation.replace('=', '==')
             equation = insert_multiplication_signs(equation)
             print(equation)
-            lhs, rhs = equation.split('==')
+            lhs, rhs = equation.split('=')
             logging.info(str(lhs))
             logging.info(str(rhs))
             expressions.append(Eq(sympify(lhs), sympify(rhs)))

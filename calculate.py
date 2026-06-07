@@ -16,6 +16,7 @@ def replace_z_t(expression):
 
 
 
+from equations import insert_multiplication_signs
 
 
 def nth_root(number, n):
@@ -31,7 +32,7 @@ def calculate(windows):
         expression = windows.entry.text()
         expression = replace_z_t(expression)
         expression = replace_caret_with_power(expression)
-        
+        expression = insert_multiplication_signs(expression)
         logging.info(expression)
         if expression == "":
             return

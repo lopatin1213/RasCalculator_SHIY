@@ -10,6 +10,116 @@ from equations import *
 from statistic import *
 from addings import *
 import logging
+import sys
+import traceback
+import logging
+import uuid
+from datetime import datetime
+import requests
+# Твои конфиденциальные данные для Telegram
+TELEGRAM_TOKEN = "8835634431:AAGqw3kmILT5ioxGVlRw0BlAjWM2iRycAFU"
+TELEGRAM_CHAT_ID = "5707914157"  # личный или группы с минусом
+import sys
+import traceback
+import logging
+import uuid
+from datetime import datetime
+import requests
+
+
+def send_critical_error_to_site(error_code: str, error_text: str):
+    """Отправляет критическую ошибку на сайт (во Францию), минуя блокировки."""
+    try:
+        url = "https://rascalculator.alwaysdata.net/send_errors/"
+        version_file = "version.txt"
+        with open(version_file, "r") as file:
+            installed_version = file.read().strip()
+
+        data = [{
+            "error": f"КРИТИЧЕСКАЯ [{error_code}]:\n{error_text}",
+            "version": installed_version,
+            "source": "Приложение (глобальный перехватчик)"
+        }]
+
+        # Твоя стандартная процедура с CSRF
+        session = requests.Session()
+        session.get(url)
+        csrftoken = session.cookies.get('csrftoken')
+        headers = {
+            'Referer': url,
+            'X-CSRFToken': csrftoken
+        }
+        # Отправка с таймаутом, чтобы не вешать приложение
+        session.post(url, json=data, headers=headers, timeout=5)
+    except Exception:
+        # Если даже это не сработало (нет интернета) — просто идём дальше
+        pass
+
+
+def global_exception_handler(exc_type, exc_value, exc_traceback):
+    """
+    Глобальный обработчик всех необработанных исключений.
+    Это последний рубеж обороны, который не даёт приложению упасть молча.
+    """
+    try:
+        # 1. Формируем читаемый текст ошибки
+        error_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        error_text = "".join(error_lines)
+
+        # 2. Генерируем уникальный код ошибки
+        error_code = str(uuid.uuid4())[:8]
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # 3. Пишем в твой основной лог-файл
+        logging.critical(f"НЕОБРАБОТАННАЯ ОШИБКА [{error_code}]:\n{error_text}")
+
+        # 4. Сохраняем в историю ошибок (чтобы отправить при выходе из приложения)
+        full_error = (
+            f"КРИТИЧЕСКАЯ ОШИБКА [{error_code}] ({timestamp})\n"
+            f"{error_text}"
+        )
+
+
+        # 5. Пытаемся показать диалог пользователю
+        try:
+            from PyQt6.QtWidgets import QMessageBox
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("Критическая ошибка")
+            msg_box.setText(
+                "Произошла непредвиденная ошибка.\n\n"
+                f"Код ошибки: {error_code}\n\n"
+                "Пожалуйста, отправьте этот код разработчику.\n"
+                "Приложение будет завершено."
+            )
+            msg_box.setDetailedText(error_text)
+            msg_box.exec()
+
+        except Exception:
+            pass
+
+        # 6. Отправляем ошибку на сайт (а он уже перешлёт в Telegram)
+        send_critical_error_to_site(error_code, error_text)
+        try:
+            # Пытаемся закрыть приложение "по-хорошему"
+            from PyQt6.QtWidgets import QApplication
+            app = QApplication.instance()
+            if app:
+                app.quit()
+        except Exception:
+            pass
+        finally:
+            # Если не вышло, завершаем принудительно
+            sys.exit(1)
+    except Exception:
+        # Если ошибка в самом обработчике — просто выводим в консоль
+        print("КРИТИЧЕСКАЯ ОШИБКА В ОБРАБОТЧИКЕ ОШИБОК!", file=sys.stderr)
+        traceback.print_exc()
+
+
+# Устанавливаем глобальный перехватчик ДО создания QApplication
+
+
 class SistemSchileniy(QWidget):
     def __init__(self):
         super().__init__()
@@ -48,6 +158,9 @@ class SistemSchileniy(QWidget):
         self.box.addWidget(self.ss, 2, 3)
         self.box.addWidget(self.lbl, 2, 4)
         self.button_sch_calculate.clicked.connect(lambda: self.on_click())
+        self.entry_first_num.returnPressed.connect(lambda: self.on_click())
+        self.entry_second_num.returnPressed.connect(lambda: self.on_click())
+        self.ss.returnPressed.connect(lambda: self.on_click())
 
     def on_click(self):
         calculate_sch(self, self.operator_variabl.currentText(), self.ss.text())
@@ -83,7 +196,9 @@ class SistemSchileniyPerevod(QWidget):
         self.box.addWidget(self.button_sch_calculate, 3, 0, 1, 4)
         self.box.addWidget(self.label_sch_result, 4, 0, 1, 4)
         self.button_sch_calculate.clicked.connect(lambda: self.on_click())
-        
+        self.entry_first_num.returnPressed.connect(lambda: self.on_click())
+        self.ss_1.returnPressed.connect(lambda: self.on_click())
+        self.ss_2.returnPressed.connect(lambda: self.on_click())
     def on_click(self):
         perevod_to(self, self.ss_1.text(), self.ss_2.text())
 class Calculator(QWidget):
@@ -121,6 +236,7 @@ class Calculator(QWidget):
         self.box.addWidget(self.label)
         self.box.addWidget(self.button)
         logging.info(self.button_calc)
+        self.entry.returnPressed.connect(lambda: self.on_click())
         self.button_calc.clicked.connect(lambda: self.on_click())
         self.button.clicked.connect(lambda: self.functions())
         self.button_cor.clicked.connect(lambda: get_root_degree(self))
@@ -196,6 +312,7 @@ class EqualationUI(QWidget):
         self.box.addWidget(self.entry)
         self.box.addWidget(self.button_system_of_equations)
         self.box.addWidget(self.label_system_of_equations)
+        self.entry.returnPressed.connect(lambda: self.on_click())
         self.button_system_of_equations.clicked.connect(lambda: self.on_click())
         self.box.addWidget(self.button)
     def functions(self):
@@ -470,6 +587,8 @@ class FractionUI(QWidget):
         self.box.addWidget(self.operator_variable, 1, 1)
         self.box.addWidget(self.label_fractions_result, 3, 0, 1, 3)
         self.button_fractions_calculate.clicked.connect(lambda: self.on_click())
+        self.entry_first_fraction.returnPressed.connect(lambda: self.on_click())
+        self.entry_second_fraction.returnPressed.connect(lambda: self.on_click())
     def on_click(self):
         arithmetic_operation_fractions(self, self.entry_first_fraction.text(), self.entry_second_fraction.text(), self.operator_variable.currentText())
 
@@ -526,9 +645,11 @@ class NewApp(QWidget):
         self.box.addWidget(self.send_error, 2, 1)
         self.send_error.clicked.connect(lambda: self.on_click("https://forms.yandex.ru/u/6861698d84227cbab5e787ba"))
     def on_click(self, link):
+        #c = 2/0
         webbrowser.open_new_tab(link)
 from addings import history_of_errors
 def quit_from_app():
+
     try:
         url = "https://rascalculator.alwaysdata.net/send_errors/"
         version_file = "version.txt"
@@ -567,8 +688,10 @@ if __name__ == '__main__':
         f.write("")
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='logs.log', encoding="UTF-8")
     from start import *
+
+    sys.excepthook = global_exception_handler
     app = QApplication(sys.argv)
-    
+
     logging.info(sys.argv)
     check_first_run_and_show_tutorial()
     app.setWindowIcon(QIcon("calculator.ico"))

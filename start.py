@@ -115,7 +115,7 @@ def check_version():
             current_version = f2.read().strip()
         if not os.path.exists(version_file):
             logging.warning(f"Файл '{version_file}' не найден. Предположительно первая установка.")
-            installed_version = "7.0.0.0"
+            installed_version = "0.0.0.0"
         else:
             with open(version_file, "r") as file:
                 installed_version = file.read().strip()
@@ -163,7 +163,7 @@ def check_version():
             # Диалоговое окно с выбором
             response = QMessageBox.question(None,
                                             'Выбор',
-                                            f"Ваша версия {installed_version} устарела.\n"
+                                            f"Ваша версия {installed_version} устарела. Актуальная: {current_version}\n"
                 f"Рекомендуется установить последнюю версию с официального сайта Расширенного Калькулятора:\n"
                 f"https://rascalculator.alwaysdata.net/download\n\n"
                 f"Эту страницу подтверждаю я как единственное официальное место для скачивания нашего калькулятора.\n\n"

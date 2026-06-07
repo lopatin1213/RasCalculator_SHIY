@@ -7,8 +7,10 @@ import re
 import sympy
 
 def get_all_sympy_function_names():
-    """Собирает имена всех встроенных функций SymPy."""
+    """Собирает имена всех встроенных функций и констант SymPy."""
     names = set()
+
+    # Сбор функций (как и раньше)
     def collect(module):
         for attr_name in dir(module):
             if attr_name.startswith('_'):
@@ -22,6 +24,21 @@ def get_all_sympy_function_names():
             elif hasattr(attr, '__module__') and 'sympy.functions' in getattr(attr, '__module__', ''):
                 collect(attr)
     collect(sympy.functions)
+
+    # Сбор констант (новое!)
+    for name in dir(sympy):
+        if name.startswith('_'):
+            continue
+        try:
+            obj = getattr(sympy, name)
+        except Exception:
+            continue
+        # Проверяем, что это константа, а не функция или класс
+        if hasattr(obj, 'is_constant') and obj.is_constant:
+            if not callable(obj) and not isinstance(obj, type):
+                names.add(name)
+
+    # Твои любимые ручные дополнения
     names.update(['sqrt', 'log', 'ln', 'Abs', 'sign', 'floor', 'ceiling'])
     return names
 
@@ -29,25 +46,21 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
     """
     Вставляет знаки умножения с учётом неявного умножения.
     Поддерживает латиницу и кириллицу в именах переменных.
+    Защищает все известные SymPy-функции и константы от разбиения.
     """
-    func_set = get_all_sympy_function_names()
+    func_set = get_all_sympy_function_names()  # теперь там и функции, и константы
     if extra_functions:
         func_set.update(extra_functions)
 
     sorted_funcs = sorted(func_set, key=len, reverse=True)
     func_pattern = '|'.join(re.escape(f) for f in sorted_funcs)
 
-    # Классы символов, включающие кириллицу
     LETTER = r'[A-Za-zА-Яа-яёЁ_]'
     LETTER_DIGIT = r'[\dA-Za-zА-Яа-яёЁ_]'
 
-    # Явно вставляем * между цифрой/буквой и функцией перед '('
-    expr = re.sub(rf'(\d)({func_pattern})(?=\()', r'\1*\2', expr)
-    expr = re.sub(rf'({LETTER})({func_pattern})(?=\()', r'\1*\2', expr)
-
-    # Защита функций (только латиница и подчёркивание) от разбиения
+    # === ШАГ 1: Защита известных имён (функций и констант) ===
     protected = {}
-    def protect(match):
+    def protect_known(match):
         name = match.group(0)
         if name not in func_set:
             return name
@@ -55,15 +68,21 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
         protected[placeholder] = name
         return placeholder
 
-    expr = re.sub(r'[A-Za-z_]\w*', protect, expr)   # только латиница с подчёркиванием
+    expr = re.sub(r'[A-Za-z_]\w*', protect_known, expr)
+
+    # === ШАГ 2: Правила вставки умножения ===
+    # Явно вставляем * между цифрой/буквой и известным именем перед '('
+    expr = re.sub(rf'(\d)({func_pattern})(?=\()', r'\1*\2', expr)
+    expr = re.sub(rf'({LETTER})({func_pattern})(?=\()', r'\1*\2', expr)
 
     # Основные правила с кириллицей
     expr = re.sub(rf'(\d)({LETTER})', r'\1*\2', expr)                # 2x, 2я
-    expr = re.sub(rf'({LETTER})({LETTER})', r'\1*\2', expr)         # ab, ая
+    # РАЗРЫВАЕМ ВСЕ ЦЕПОЧКИ БУКВ (кроме защищённых имён)
+    expr = re.sub(rf'({LETTER})(?={LETTER})', r'\1*', expr)         # a*b*c, а*я
     expr = re.sub(rf'({LETTER_DIGIT})(\()', r'\1*\2', expr)         # a(, 3(, я(
     expr = re.sub(rf'(\))({LETTER_DIGIT}\()', r'\1*\2', expr)       # )a, )(, )я
 
-    # Возвращаем функции
+    # === ШАГ 3: Возвращаем защищённые имена на место ===
     for placeholder, name in protected.items():
         expr = expr.replace(placeholder, name)
 

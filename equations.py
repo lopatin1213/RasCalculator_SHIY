@@ -10,7 +10,14 @@ def get_all_sympy_function_names():
     """Собирает имена всех встроенных функций и констант SymPy."""
     names = set()
 
-    # Сбор функций (как и раньше)
+    for name, obj in vars(sympy).items():
+        if name.startswith('_'):
+            continue
+        if isinstance(obj, FunctionClass):
+            names.add(name)
+
+        # 2. Явный перебор подмодулей sympy.functions на случай, если что-то пропустили
+
     def collect(module):
         for attr_name in dir(module):
             if attr_name.startswith('_'):
@@ -19,10 +26,14 @@ def get_all_sympy_function_names():
                 attr = getattr(module, attr_name)
             except Exception:
                 continue
-            if callable(attr) or isinstance(attr, type):
+            if isinstance(attr, FunctionClass):
+                names.add(attr_name)
+            elif callable(attr) or isinstance(attr, type):
+                # на случай, если функция лежит как обычный callable
                 names.add(attr_name)
             elif hasattr(attr, '__module__') and 'sympy.functions' in getattr(attr, '__module__', ''):
                 collect(attr)
+
     collect(sympy.functions)
 
     # Сбор констант (новое!)
@@ -39,7 +50,8 @@ def get_all_sympy_function_names():
                 names.add(name)
 
     # Твои любимые ручные дополнения
-    names.update(['sqrt', 'log', 'ln', 'Abs', 'sign', 'floor', 'ceiling'])
+    names.update(['sqrt', 'log', 'ln', 'Abs', 'sign', 'floor', 'ceiling', 'deg', 'rad'])
+    print(names)
     return names
 
 def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
@@ -329,8 +341,12 @@ def solve_system_of_equations(window):
             logging.info(str(solution))
             if isinstance(solution, list):
                 num = []  # Список для хранения результирующих словарей
-                
+
                 for x in solution:
+
+                    sol1 = list(x.values())[0]
+                    if 'I' in str(sol1):
+                        comment = f"Но решения содержат комплексные числа (имеют I), если ты школьник, то пропусти их"
                     # Применяем точность к каждому решению
                     numeric_dict = {var: addings.dynamic_precision(sol.evalf()) for var, sol in x.items()}
                     
@@ -359,7 +375,10 @@ def solve_system_of_equations(window):
             
             
             # Выводим решение
-            window.label_system_of_equations.setText(f"Решение системы уравнений:\n{formatted_result}")
+            if comment:
+                window.label_system_of_equations.setText(f"Решение системы уравнений:\n{formatted_result}, {comment}")
+            else:
+                window.label_system_of_equations.setText(f"Решение системы уравнений:\n{formatted_result}")
         else:
             # Если решение не найдено
             window.label_system_of_equations.setText("Решение не найдено.")

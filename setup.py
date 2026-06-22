@@ -56,7 +56,7 @@ options = {
     "build_exe": {
         
         "includes": [],                      # Дополнительные модули, если нужны
-        "include_files": ["import_data.ui","calculator.ico", "version.txt", 'error_box.ui', 'preferences.txt', 'cur_version.txt', "logs.log"],# Добавляем файл version.txt
+        "include_files": ["import_data.ui","calculator.ico", "version.txt", 'error_box.ui', 'instruction.ui', 'preferences.txt', 'cur_version.txt', "logs.log"],# Добавляем файл version.txt
         "optimize": 2,
         "excludes": ["PyQt5", "tkinter", "scipy", "kivy", "kivymd"]
          # Попробуйте добавить этот параметр# Уровень оптимизации байт-кода (может уменьшить размер)

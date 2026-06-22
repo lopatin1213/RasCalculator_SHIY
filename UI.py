@@ -9,6 +9,7 @@ from calculate import *
 from equations import *
 from statistic import *
 from addings import *
+from time_math import compute_time
 import logging
 import sys
 import traceback
@@ -17,8 +18,7 @@ import uuid
 from datetime import datetime
 import requests
 # Твои конфиденциальные данные для Telegram
-TELEGRAM_TOKEN = "8835634431:AAGqw3kmILT5ioxGVlRw0BlAjWM2iRycAFU"
-TELEGRAM_CHAT_ID = "5707914157"  # личный или группы с минусом
+
 import sys
 import traceback
 import logging
@@ -592,6 +592,130 @@ class FractionUI(QWidget):
     def on_click(self):
         arithmetic_operation_fractions(self, self.entry_first_fraction.text(), self.entry_second_fraction.text(), self.operator_variable.currentText())
 
+class TimeUI(QWidget):
+    def __init__(self):
+        super().__init__()
+        label = QLabel("Введите временное выражение (посмотрите инструкцию для ввода):", self)
+        self.text = QLineEdit(self)
+        self.box = QVBoxLayout(self)
+        self.box1 = QGridLayout(self)
+
+        x = 0
+        y = 0
+        func = ["y", "mo", "d", "h", "m", "s", "ms", "->", ":"]
+        for fun in func:
+            print(fun)
+            button = QPushButton(fun)
+            button.clicked.connect(lambda _, f=fun: self.on__btn_click(f))
+
+            self.box1.addWidget(button, y, x)
+            x += 1
+            if x == 3:
+                y += 1
+                x = 0
+        self.button = QPushButton("Вычислить", self)
+        self.result = QLineEdit(self)
+        self.box.addWidget(label)
+        self.box.addWidget(self.text)
+        self.box.addLayout(self.box1)
+        self.box.addWidget(self.button)
+        self.box.addWidget(self.result)
+        instrc = QPushButton("Инструкция")
+        self.box.addWidget(instrc)
+        self.button.clicked.connect(lambda: self.on_click())
+        instrc.clicked.connect(lambda: self.instrct())
+
+
+
+    def on__btn_click(self, func):
+        try:
+            logging.info(func)
+
+
+            self.text.insert(func)
+            self.text.setFocus()
+        except Exception as e:
+            print(e)
+
+    def on_click(self):
+        compute_time(self)
+    def instrct(self):
+        error_box = loadUi("instruction.ui")
+
+        error_box.show()
+        text = """
+                        
+Инструкция по работе с калькулятором времени
+Этот раздел позволяет складывать, вычитать, умножать и переводить временные интервалы.
+
+🔤 Единицы измерения
+Вы можете использовать следующие обозначения:
+
+y — год
+
+mo — месяц
+
+d — день
+
+h — час
+
+m — минута
+
+s — секунда
+
+ms — миллисекунда
+
+Важно: Регистр важен! Используйте именно маленькие буквы.
+
+➕ Базовые операции (+, -, *, /)
+Вы можете складывать, вычитать, умножать и делить интервалы.
+
+Примеры:
+
+1h + 30m → 1.5h (или 1h 30m)
+
+1d - 12h → 12h
+
+2h * 3 → 6h
+
+1d / 2 → 12h
+
+↩️ Перевод в другие единицы (->)
+Чтобы получить результат в конкретной единице, используйте стрелку ->.
+
+Примеры:
+
+12h -> m → 720m
+
+1d -> h → 24h
+
+1y -> d → 365d (приблизительно)
+
+31d -> mo → 1mo (средний месяц)
+
+🧩 Сложение с автоматическим упрощением
+Если результат можно упростить до более крупной единицы, калькулятор сделает это сам.
+
+Примеры:
+
+12h + 12h → 1d (а не 24h)
+
+6h + 30h → 1d 12h
+
+30d + 30d → 2mo (приблизительно)
+
+Но вы всегда можете указать целевую единицу через ->, чтобы получить ответ в нужном формате.
+
+❌ Примеры ошибок (как НЕ надо писать)
+1h + 2y — разные единицы могут быть преобразованы, но будьте осторожны с месяцами и днями (в них нет фиксированного значения).
+
+1h * 1h — умножение времени на время даёт h², что не поддерживается.
+
+1h / 0 — деление на ноль невозможно.
+                
+                                """
+        error_box.instrct_text.setText(text)
+        error_box.exec()
 class NewApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -630,11 +754,15 @@ class NewApp(QWidget):
         # self.history_text = QTextEdit(self)
         self.box.addWidget(tab, 0, 0, 3, 1)
         # self.box.addWidget(self.history_text)
-        self.setGeometry(30, 30, 1000, 300)
+        self.setGeometry(30, 30, 1100, 300)
         page7 = QWidget(tab)
         schp = SistemSchileniyPerevod()
         page7.setLayout(schp.box)
         tab.addTab(page7, "Перевод в сс")
+        tim = TimeUI()
+        page8 = QWidget(tab)
+        page8.setLayout(tim.box)
+        tab.addTab(page8, "Время")
         self.reklam = QPushButton("Калькулятор по формулам", self)
         self.box.addWidget(self.reklam, 1, 1)
         self.tg = QPushButton("Телеграм канал", self)

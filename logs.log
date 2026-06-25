@@ -1,23 +1,44 @@
-2026-06-25 12:58:12,090 - INFO - ['D:\\RasCalculator\\UI.py']
-2026-06-25 12:58:12,092 - DEBUG - Starting new HTTPS connection (1): www.google.com:443
-2026-06-25 12:58:12,533 - DEBUG - https://www.google.com:443 "HEAD / HTTP/1.1" 200 0
-2026-06-25 12:58:12,539 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
-2026-06-25 12:58:13,323 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /version_check/ HTTP/1.1" 200 10
-2026-06-25 12:58:13,338 - INFO - У вас установлена актуальная версия.
-2026-06-25 12:58:13,341 - INFO - Файл 'preferences.txt' прочитан: False, интерпретировано как: False
-2026-06-25 12:58:13,341 - INFO - Это не первый запуск.
-2026-06-25 12:58:13,365 - INFO - <PyQt6.QtWidgets.QPushButton object at 0x000001FC4BBE0EB0>
-2026-06-25 12:58:25,520 - DEBUG - Выполнение
-2026-06-25 12:58:25,539 - INFO - 2√2
-2026-06-25 12:58:25,540 - INFO - 1.4142135624
-2026-06-25 12:58:25,540 - INFO - 1.4142135624
-2026-06-25 12:58:36,934 - DEBUG - Выполнение
-2026-06-25 12:58:36,937 - INFO - pi
-2026-06-25 12:58:36,938 - INFO - 3.14159265358979
-2026-06-25 12:58:36,939 - INFO - 3.14159265358979
-2026-06-25 12:58:36,939 - INFO - <class 'sympy.core.numbers.Float'>
-2026-06-25 12:58:36,940 - INFO - 3.141593
-2026-06-25 12:58:36,940 - INFO - 3.141593
-2026-06-25 12:58:47,273 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
-2026-06-25 12:58:48,083 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /send_errors/ HTTP/1.1" 405 29
-2026-06-25 12:58:48,164 - DEBUG - https://rascalculator.alwaysdata.net:443 "POST /send_errors/ HTTP/1.1" 400 22
+2026-06-26 00:46:43,050 - INFO - ['D:\\RasCalculator\\UI.py']
+2026-06-26 00:46:43,082 - DEBUG - Starting new HTTPS connection (1): www.google.com:443
+2026-06-26 00:46:43,535 - DEBUG - https://www.google.com:443 "HEAD / HTTP/1.1" 200 0
+2026-06-26 00:46:43,566 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
+2026-06-26 00:46:44,208 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /version_check/ HTTP/1.1" 200 10
+2026-06-26 00:46:44,223 - INFO - У вас установлена актуальная версия.
+2026-06-26 00:46:44,223 - INFO - Файл 'preferences.txt' прочитан: False, интерпретировано как: False
+2026-06-26 00:46:44,223 - INFO - Это не первый запуск.
+2026-06-26 00:46:44,286 - INFO - <PyQt6.QtWidgets.QPushButton object at 0x0000024BD4945C70>
+2026-06-26 00:47:01,344 - DEBUG - Выполнение
+2026-06-26 00:47:01,438 - INFO - 2/0
+2026-06-26 00:47:01,438 - ERROR - Ошибка
+2026-06-26 00:47:01,485 - DEBUG - toplevel widget is QDialog
+2026-06-26 00:47:01,485 - DEBUG - setting property geometry
+2026-06-26 00:47:01,485 - DEBUG - setting property windowTitle
+2026-06-26 00:47:01,485 - DEBUG - setting property toolTipDuration
+2026-06-26 00:47:01,485 - DEBUG - push QDialog Dialog
+2026-06-26 00:47:01,531 - DEBUG - setting property geometry
+2026-06-26 00:47:01,531 - DEBUG - setting property readOnly
+2026-06-26 00:47:01,531 - DEBUG - push QTextEdit error_text
+2026-06-26 00:47:01,531 - DEBUG - pop widget QTextEdit error_text
+2026-06-26 00:47:01,531 - DEBUG - new topwidget <PyQt6.QtWidgets.QDialog object at 0x0000024BD587CAF0>
+2026-06-26 00:47:01,531 - DEBUG - setting property geometry
+2026-06-26 00:47:01,531 - DEBUG - push QWidget horizontalLayoutWidget
+2026-06-26 00:47:01,547 - DEBUG - setting property pyuicMargins
+2026-06-26 00:47:01,547 - DEBUG - push QHBoxLayout horizontalLayout
+2026-06-26 00:47:01,547 - DEBUG - setting property orientation
+2026-06-26 00:47:01,547 - DEBUG - setting property standardButtons
+2026-06-26 00:47:01,563 - DEBUG - setting property centerButtons
+2026-06-26 00:47:01,563 - DEBUG - push QDialogButtonBox buttonBox
+2026-06-26 00:47:01,563 - DEBUG - pop widget QDialogButtonBox buttonBox
+2026-06-26 00:47:01,563 - DEBUG - new topwidget <PyQt6.QtWidgets.QWidget object at 0x0000024BD587D1D0>
+2026-06-26 00:47:01,563 - DEBUG - setting property text
+2026-06-26 00:47:01,563 - DEBUG - push QPushButton send_error
+2026-06-26 00:47:01,563 - DEBUG - pop widget QPushButton send_error
+2026-06-26 00:47:01,563 - DEBUG - new topwidget <PyQt6.QtWidgets.QWidget object at 0x0000024BD587D1D0>
+2026-06-26 00:47:01,563 - DEBUG - pop layout QHBoxLayout horizontalLayout
+2026-06-26 00:47:01,563 - DEBUG - pop widget QWidget horizontalLayoutWidget
+2026-06-26 00:47:01,563 - DEBUG - new topwidget <PyQt6.QtWidgets.QDialog object at 0x0000024BD587CAF0>
+2026-06-26 00:47:01,563 - DEBUG - pop widget QDialog Dialog
+2026-06-26 00:47:01,563 - DEBUG - new topwidget None
+2026-06-26 00:47:41,831 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
+2026-06-26 00:47:42,472 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /send_errors/ HTTP/1.1" 405 29
+2026-06-26 00:47:42,581 - DEBUG - https://rascalculator.alwaysdata.net:443 "POST /send_errors/ HTTP/1.1" 400 22

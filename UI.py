@@ -26,6 +26,13 @@ import uuid
 from datetime import datetime
 import requests
 
+def is_development_mode():
+    try:
+        with open("develop.txt", "r") as f:
+            return f.read().strip().lower() == "true"
+    except FileNotFoundError:
+        # Если файла нет — значит, это продакшен (сборка)
+        return False
 
 def send_critical_error_to_site(error_code: str, error_text: str):
     """Отправляет критическую ошибку на сайт (во Францию), минуя блокировки."""
@@ -34,23 +41,26 @@ def send_critical_error_to_site(error_code: str, error_text: str):
         version_file = "version.txt"
         with open(version_file, "r") as file:
             installed_version = file.read().strip()
-
+        develop = is_development_mode()
+        print(develop)
         data = [{
-            "error": f"КРИТИЧЕСКАЯ [{error_code}]:\n{error_text}",
-            "version": installed_version,
-            "source": "Приложение (глобальный перехватчик)"
-        }]
-
-        # Твоя стандартная процедура с CSRF
-        session = requests.Session()
-        session.get(url)
-        csrftoken = session.cookies.get('csrftoken')
-        headers = {
-            'Referer': url,
-            'X-CSRFToken': csrftoken
-        }
-        # Отправка с таймаутом, чтобы не вешать приложение
-        session.post(url, json=data, headers=headers, timeout=5)
+                "error": f"КРИТИЧЕСКАЯ [{error_code}]:\n{error_text}",
+                "version": installed_version,
+                "source": "Приложение (глобальный перехватчик)"
+            }]
+        if not develop:
+            # Твоя стандартная процедура с CSRF
+            session = requests.Session()
+            session.get(url)
+            csrftoken = session.cookies.get('csrftoken')
+            headers = {
+                'Referer': url,
+                'X-CSRFToken': csrftoken
+            }
+            # Отправка с таймаутом, чтобы не вешать приложение
+            session.post(url, json=data, headers=headers, timeout=5)
+        else:
+            logging.critical(data)
     except Exception:
         # Если даже это не сработало (нет интернета) — просто идём дальше
         pass
@@ -209,7 +219,7 @@ class Calculator(QWidget):
         label_basic_calc_text = QLabel(self)
         label_basic_calc_text.setText("Введите числовое выражение (2+2):")
         label_basic_calc_text.move(0, 0)
-
+        #c = 2/0
         self.entry = QLineEdit()
         self.entry.move(0, 20)
 
@@ -604,7 +614,7 @@ class TimeUI(QWidget):
         y = 0
         func = ["y", "mo", "d", "h", "m", "s", "ms", "->", ":"]
         for fun in func:
-            print(fun)
+            #print(fun)
             button = QPushButton(fun)
             button.clicked.connect(lambda _, f=fun: self.on__btn_click(f))
 

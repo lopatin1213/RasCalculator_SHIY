@@ -335,7 +335,7 @@ def solve_system_of_equations(window):
         # Решаем систему уравнений
         solution = solve(expressions, used_variables)
         logging.info(f"Решение системы уравнений: {solution}")
-        
+        comment = None
         if solution:
             # Применяем dynamic_precision к каждому значению
             logging.info(str(solution))

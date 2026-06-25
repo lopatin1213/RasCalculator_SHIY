@@ -32,6 +32,39 @@ def _wrap_colon_blocks(expr: str) -> str:
     # Заменяем все такие блоки
     expr = re.sub(pattern, repl, expr)
     return expr
+
+def _insert_colons(expr: str) -> str:
+    """
+    Вставляет ':' между блоками 'число+единица', если между ними нет оператора.
+    """
+    # Регулярка: ищем два подряд идущих блока вида число+единица
+    # Пример: 2h30m -> 2h:30m
+    # 1d12h30m -> 1d:12h:30m
+    pattern = r'(\d+[a-zA-Z]+)(?=\d+[a-zA-Z]+)'
+    # Заменяем на первую группу + ':'
+    # Но нужно делать это аккуратно, чтобы не задеть уже существующие ':'
+    # Сначала ищем все блоки вида число+единица
+    # Простой подход: идём по строке и если видим границу между двумя блоками — вставляем ':'
+    # Но проще с помощью регулярки: ищем место между двумя блоками и вставляем ':'
+
+    # Блок — это число, за которым следует единица (одна или несколько букв)
+    # Между ними не должно быть операторов (+, -, *, /, (, ))
+    # Но наша регулярка захватывает только последовательности, поэтому она сработает
+
+    # Используем re.sub с функцией замены
+    def repl(match):
+        # match — это группа (число+единица) перед следующим блоком
+        # Добавляем ':'
+        return match.group(0) + ':'
+
+    # Заменяем все вхождения, пока есть совпадения
+    # Но делаем это рекурсивно, чтобы обработать цепочки
+    while True:
+        new_expr = re.sub(pattern, repl, expr)
+        if new_expr == expr:
+            break
+        expr = new_expr
+    return expr
 def compute_time(window):
     try:
         expr = window.text.text().strip()
@@ -56,7 +89,7 @@ def _compute(expr: str) -> str:
         expr = expr.replace(" ", "")
         if not expr:
             return "Ошибка: пустое выражение"
-
+        expr = _insert_colons(expr)
         # Обработка : блоков
         print(expr)
         expr = _wrap_colon_blocks(expr)
@@ -130,7 +163,8 @@ def _convert_to_unit(value_ms: float, unit: str) -> str:
     if unit not in UNIT_TO_MS:
         return f"Ошибка: неизвестная единица '{unit}'"
     result = value_ms / UNIT_TO_MS[unit]
-    return f"{int(result)}{unit}" if result.is_integer() else f"{result:.2f}{unit}"
+    result = addings.dynamic_precision(result)
+    return f"{result}{unit}"
 
 def _format_expanded(value_ms: float) -> str:
     if value_ms < 0:

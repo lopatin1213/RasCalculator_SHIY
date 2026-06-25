@@ -26,7 +26,7 @@ def dynamic_precision(value):
         order = int(decimal_value.adjusted())
         rounded_value = decimal_value.normalize()
         
-        precision = max(6, -order + 6)
+        precision = max(10, -order + 10)
         logging.info(format(rounded_value, f'.{precision}f').rstrip('0').rstrip('.'))
         return format(rounded_value, f'.{precision}f').rstrip('0').rstrip('.')
     

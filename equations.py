@@ -79,9 +79,9 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
         placeholder = f'\ue000{len(protected)}\ue001'
         protected[placeholder] = name
         return placeholder
-
+    print(expr)
     expr = re.sub(r'[A-Za-z_]\w*', protect_known, expr)
-
+    print(expr)
     # === ШАГ 2: Правила вставки умножения ===
     # Явно вставляем * между цифрой/буквой и известным именем перед '('
     expr = re.sub(rf'(\d)({func_pattern})(?=\()', r'\1*\2', expr)

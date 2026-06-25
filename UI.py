@@ -773,7 +773,7 @@ class NewApp(QWidget):
         page8 = QWidget(tab)
         page8.setLayout(tim.box)
         tab.addTab(page8, "Время")
-        self.reklam = QPushButton("Калькулятор по формулам", self)
+       # self.reklam = QPushButton("Калькулятор по формулам", self)
         self.box.addWidget(self.reklam, 1, 1)
         self.tg = QPushButton("Телеграм канал", self)
         self.tg.clicked.connect(lambda: self.on_click("https://t.me/Ras_Kakulator_official"))

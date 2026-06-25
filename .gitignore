@@ -1,0 +1,23 @@
+﻿################################################################################
+# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
+################################################################################
+
+/__pycache__
+*.mp4
+*.zip
+/Vovan/venv
+/Vovan/buildozer.spec
+/Vovan/main.py
+/Vovan/samy moshi widgets.kv
+/Копия Тезисы.wbk
+*.wbk
+/~$Проект доклад.pptx
+/Vovan/.venv
+/Vovan/.idea
+/venv
+/.vs
+/dist
+*.csv
+/test.json
+/test.txt
+/test.xlsx

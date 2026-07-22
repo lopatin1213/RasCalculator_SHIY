@@ -732,7 +732,7 @@ class NewApp(QWidget):
         tab = QTabWidget(self)
         self.page = QWidget(tab)
         self.box = QGridLayout(self)
-        self.setWindowTitle("Расширенный калькулятор")
+        self.setWindowTitle("VartICa")
         calculator = Calculator()
         self.page.setLayout(calculator.box)
         tab.addTab(self.page, 'Калькулятор')
@@ -774,16 +774,16 @@ class NewApp(QWidget):
         page8.setLayout(tim.box)
         tab.addTab(page8, "Время")
        # self.reklam = QPushButton("Калькулятор по формулам", self)
-        self.box.addWidget(self.reklam, 1, 1)
+        #self.box.addWidget(self.reklam, 1, 1)
         self.tg = QPushButton("Телеграм канал", self)
         self.tg.clicked.connect(lambda: self.on_click("https://t.me/Ras_Kakulator_official"))
         self.box.addWidget(self.tg, 0, 1)
-        self.reklam.clicked.connect(lambda: self.on_click("https://kostyaramensky.pythonanywhere.com/"))
+        #self.reklam.clicked.connect(lambda: self.on_click("https://kostyaramensky.pythonanywhere.com/"))
         self.send_error = QPushButton("Сообщить об ошибке", self)
         self.box.addWidget(self.send_error, 2, 1)
         self.send_error.clicked.connect(lambda: self.on_click("https://forms.yandex.ru/u/6861698d84227cbab5e787ba"))
     def on_click(self, link):
-        #c = 2/0
+#        c = 2/0
         webbrowser.open_new_tab(link)
 from addings import history_of_errors
 def quit_from_app():

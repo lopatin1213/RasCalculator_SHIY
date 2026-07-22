@@ -19,7 +19,7 @@ with open("logs.log", "w") as f4:
     f4.write('')
 base_executable = 'Win32Gui'
 # Базовые настройки сборки
-app_name = "Рас. Калькулятор"       # Название вашего приложения
+app_name = "VartICa"       # Название вашего приложения
      # Тип приложения (GUI или консольное); None - консольный режим
 icon_path = "calculator.ico"      # Путь к иконке приложения (если есть)
 
@@ -30,7 +30,7 @@ start_menu_shortcut = Executable(
     base=base_executable,
     icon=icon_path,
     target_name="calculator.exe",
-    shortcut_name='Рас.Калькулятор',
+    shortcut_name=app_name,
     shortcut_dir='ProgramMenuFolder'
 )
 
@@ -40,7 +40,7 @@ desktop_shortcut = Executable(
     base=base_executable,
     icon=icon_path,
     target_name="calculator.exe",
-    shortcut_name='Рас.Калькулятор',
+    shortcut_name=app_name,
     shortcut_dir='DesktopFolder'
 )
 # Panel_shortcut = Executable(
@@ -62,7 +62,7 @@ options = {
          # Попробуйте добавить этот параметр# Уровень оптимизации байт-кода (может уменьшить размер)
     },
     "bdist_msi": {
-        "upgrade_code": "{16666666-6667-6666-6666-666666666666}",  # Уникальный идентификатор обновления
+        "upgrade_code": "{16667666-6667-6666-6666-666666666666}",  # Уникальный идентификатор обновления
         "add_to_path": False,  # Не добавлять в PATH
         'initial_target_dir': 'C:\\Antonrasrab',
         
@@ -77,7 +77,7 @@ setup(
     description="Рас. Калькулятор",
     executables=[start_menu_shortcut, desktop_shortcut],  # Два разных ярлык,
     options=options,
-    author='PythonSoft',
+    author='VartRusData',
     #icon=icon_path
 )
 from plyer import notification

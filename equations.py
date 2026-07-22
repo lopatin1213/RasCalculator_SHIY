@@ -8,49 +8,7 @@ import sympy
 
 def get_all_sympy_function_names():
     """Собирает имена всех встроенных функций и констант SymPy."""
-    names = set()
-
-    for name, obj in vars(sympy).items():
-        if name.startswith('_'):
-            continue
-        if isinstance(obj, FunctionClass):
-            names.add(name)
-
-        # 2. Явный перебор подмодулей sympy.functions на случай, если что-то пропустили
-
-    def collect(module):
-        for attr_name in dir(module):
-            if attr_name.startswith('_'):
-                continue
-            try:
-                attr = getattr(module, attr_name)
-            except Exception:
-                continue
-            if isinstance(attr, FunctionClass):
-                names.add(attr_name)
-            elif callable(attr) or isinstance(attr, type):
-                # на случай, если функция лежит как обычный callable
-                names.add(attr_name)
-            elif hasattr(attr, '__module__') and 'sympy.functions' in getattr(attr, '__module__', ''):
-                collect(attr)
-
-    collect(sympy.functions)
-
-    # Сбор констант (новое!)
-    for name in dir(sympy):
-        if name.startswith('_'):
-            continue
-        try:
-            obj = getattr(sympy, name)
-        except Exception:
-            continue
-        # Проверяем, что это константа, а не функция или класс
-        if hasattr(obj, 'is_constant') and obj.is_constant:
-            if not callable(obj) and not isinstance(obj, type):
-                names.add(name)
-
-    # Твои любимые ручные дополнения
-    names.update(['sqrt', 'log', 'ln', 'Abs', 'sign', 'floor', 'ceiling', 'deg', 'rad'])
+    names = set(sympy.__all__)
     print(names)
     return names
 
@@ -83,6 +41,7 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
     expr = re.sub(r'[A-Za-z_]\w*', protect_known, expr)
     print(expr)
     # === ШАГ 2: Правила вставки умножения ===
+    expr = re.sub(rf'(\d+)(\ue000\d+\ue001)(?=\()', r'\1*\2', expr)
     # Явно вставляем * между цифрой/буквой и известным именем перед '('
     expr = re.sub(rf'(\d)({func_pattern})(?=\()', r'\1*\2', expr)
     expr = re.sub(rf'({LETTER})({func_pattern})(?=\()', r'\1*\2', expr)
@@ -99,105 +58,68 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
         expr = expr.replace(placeholder, name)
 
     return expr
-def plot_linear_equation(a, b, c):
-    """
-    Строит график линейного уравнения ax + by + c = 0.
-    """
-    try:
-        # Генерируем диапазон значений x с высокой точностью
-        x = np.linspace(-10000, 10000, 100000)  # 100000 точек между -10000 и 10000
-        # Вычисляем соответствующие значения y
-        y = (-c - a * x) / b
-        # Строим график
-        fig, ax = plt.subplots()
-        ax.plot(x, y, label=f"{a}x + {b}y + {c} = 0")
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        ax.grid(True)
-        ax.legend()
-    
-        # Устанавливаем начальные границы оси X и Y
-        ax.set_xlim([-10, 10])
-        ax.set_ylim([-10, 10])
-        b_str = str(b)
-        # Центрируем график относительно точки (0, b)
-        center_x = 0
-        if not "-" in b_str:
-            center_y = -c / b
-        else:
-            center_y = -c / b
-        center_y = float(center_y)  # Убеждаемся, что center_y является числом
-        center_x = float(center_x)
-        ax.set_xlim(center_x - 10, center_x + 10)  # Центрирование по оси X
-        ax.set_ylim(center_y - 10, center_y + 10)  # Центрирование по оси Y
-    
-        # Выделяем оси x и y
-        ax.axhline(0, color='black', linewidth=1)  # Горизонтальная ось y=0
-        ax.axvline(0, color='black', linewidth=1)  # Вертикальная ось x=0
-    
-        # Помещаем точку (0, b) в центр графика
-        ax.scatter(center_x, center_y, s=50, color='blue', marker='o', label=f'(0, {center_y})')  # Размер точки s=50
-        ax.legend()
-        y_1 = 0
-        if not "-" in b_str:
-            x_1 = -c / a
-        else:
-            x_1 = -c / a
-        x_1 = float(x_1)
-        ax.scatter(x_1, y_1, s=50, color='red', marker='o', label=f'({x_1}, 0)')
-        ax.legend()
-    
-        # Назначаем события мыши для динамического масштабирования
-        def on_motion(event):
-            if event.inaxes:
-                # Получаем текущие границы оси X
-                xmin, xmax = ax.get_xlim()
-                # Проверяем, достигнута ли граница оси X
-                if event.xdata > xmax - 0.01 * (xmax - xmin) or event.xdata < xmin + 0.01 * (xmax - xmin):
-                    # Расширяем границы оси X
-                    ax.set_xlim(xmin - 0.05 * (xmax - xmin), xmax + 0.05 * (xmax - xmin))
-                    fig.canvas.draw_idle()
-    
-        # Привязываем событие движения мыши
-        fig.canvas.mpl_connect('motion_notify_event', on_motion)
-    
-        plt.show()
-    except Exception as e:
-        raise Exception(e)
 
+
+def plot_equation(eq, var1, var2):
+    try:
+        expr = eq.lhs - eq.rhs
+        vars_list = sorted(eq.free_symbols, key=lambda s: str(s))
+        var1, var2 = vars_list[0], vars_list[1]
+        # === 1. Безопасный поиск пересечений (ловит ошибки abs) ===
+        x_intercepts = []
+        y_intercepts = []
+        try:
+            x_sol = solve(expr.subs(var2, 0), var1)
+            x_intercepts = [float(s) for s in x_sol if s.is_real]
+        except Exception:
+            pass # Если sympy не может решить (abs), пропускаем
+
+        try:
+            y_sol = solve(expr.subs(var1, 0), var2)
+            y_intercepts = [float(s) for s in y_sol if s.is_real]
+        except Exception:
+            pass
+
+        # === 2. Увеличиваем разрешение для гладкости (было 500, стало 1000) ===
+        limit = 1000
+        x_vals = np.linspace(-limit, limit, 8000)
+        y_vals = np.linspace(-limit, limit, 8000)
+        X, Y = np.meshgrid(x_vals, y_vals)
+
+        f = lambdify((var1, var2), expr, modules='numpy')
+        Z = f(X, Y)
+        Z = np.where(np.abs(Z) > 1e6, np.nan, Z)
+        Z[~np.isfinite(Z)] = np.nan
+        fig, ax = plt.subplots()
+        ax.contour(X, Y, Z, levels=[0], colors='blue', linewidths=2)
+
+        # Оси X и Y
+        ax.axhline(0, color='black', linewidth=1)
+        ax.axvline(0, color='black', linewidth=1)
+
+        # Точки пересечения (теперь они не вызовут ошибку, если не найдутся)
+        for x in x_intercepts:
+            ax.scatter(x, 0, s=60, color='red', marker='o', zorder=5)
+        for y in y_intercepts:
+            ax.scatter(0, y, s=60, color='blue', marker='o', zorder=5)
+
+        # Подписи осей строго по переменным
+        ax.set_xlabel(str(var1))
+        ax.set_ylabel(str(var2))
+        ax.grid(True, linestyle='--', alpha=0.7)
+        ax.set_xlim(-10, 10)
+        ax.set_ylim(-10, 10)
+
+        plt.show()
+
+    except Exception as e1:
+        logging.warning(f"Matplotlib contour не сработал: {e1}")
+        # Если контур упал (сингулярности), используем sympy.plot_implicit
+        from sympy.plotting import plot_implicit
+        p = plot_implicit(eq, (var1, -10, 10), (var2, -10, 10), show=False)
+        p.show()
 
 import re
-
-
-def transform_equation(lhs, rhs):
-    """
-    Преобразует уравнение вида y = kx + b в b = y - kx.
-
-    Аргументы:
-    - lhs: левая сторона уравнения.
-    - rhs: правая сторона уравнения.
-
-    Возвращает:
-    Преобразованное уравнение.
-    """
-    # Регулярное выражение для извлечения коэффициентов и переменных
-    pattern = r'(?P<y>\w+)\s*=\s*((?P<k>[+-]?\d*\.*\d*)?\s*\*\s*)?(?P<x>\w+)(?:\s*[+-]?\s*(?P<b>-?\d*\.*\d*))?'
-    # Объединяем левую и правую стороны в одно уравнение
-    equation = f"{lhs} = {rhs}"
-    
-    match = re.match(pattern, equation)
-    
-    if not match:
-        return "Неверный формат уравнения."
-    
-    y = match.group('y')
-    k = match.group('k') or '1'  # Если коэффициент не указан, считаем его равным 1
-    x = match.group('x')
-    b = match.group('b') or '0'
-    
-    transformed_eq = f"-{k}*{x}+{y}={b}"
-    return transformed_eq
-
 from PyQt6.QtWidgets import QMessageBox
 def solve_system_of_equations(window):
     try:
@@ -234,103 +156,28 @@ def solve_system_of_equations(window):
         # Проверка на недоопределённость системы
         if len(expressions) < len(used_variables) <= 2:
             logging.info("Количество уравнений меньше количества переменных, система недоопределена.")
+
+            # Диалог (оставляем, как ты просил)
             response = QMessageBox.question(None,
                                             'Выбор',
                                             'Бесконечное количество решений.\nВы хотите увидеть график или уравнение функции?',
                                             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            
-            logging.info(str(response))
+
             if response == QMessageBox.StandardButton.Yes:
-                variable = re.findall('[A-Za-zА-ЯЁа-яё]', lhs)
-                
-                logging.info(str(variable))
-                variables = [Symbol(name) for name in variable]
-                logging.info(str(variables))
-                
-                if len(variables) < len(used_variables):
-                    
-                    equation = transform_equation(lhs, rhs)
-                    logging.info(str(equation))
-                    equation = equation.replace('=', '==')
-                    lhs, rhs = equation.split('==')
-                    logging.info(str(lhs))
-                    logging.info(str(rhs))
-                    equ = Eq(sympify(lhs), sympify(rhs))
-                    logging.info(str(equ))
-                    variable = re.findall('[A-Za-zА-ЯЁа-яё]', lhs)
-                    logging.info(variable)
-                    variables = [Symbol(name) for name in variable]
-                    logging.info(str(variables))
-                    eq = expressions[0]
-                    logging.info(str(variables))
-                    logging.info(str(iter(variables)))
-                    logging.info(str(next(iter(variables))))
-                    first_var = next(iter(variables))
-                    # Автоматически определяем первые две переменные
-                    second_var = next(var for var in variables if var != first_var)
-                    logging.info(str(first_var))
-                    logging.info(str(second_var))
-                    # Используя все свободные символы
-                    collected_expr = equ.lhs.collect([first_var, second_var])
-                    logging.info(str(collected_expr))
-                    collected_expr_str = str(collected_expr)
-                    collected_expr_str = collected_expr_str.replace(' ', '')
-                    if str(lhs) == collected_expr_str:
-                        
-                        a = collected_expr.coeff(first_var)  # Коэффициент при первой переменной
-                        b = collected_expr.coeff(second_var)  # Коэффициент при второй переменной
-                        c = -equ.rhs
-                        logging.info(str(a))
-                        logging.info(str(b))
-                        logging.info(str(c))
-                    else:
-                        a = collected_expr.coeff(second_var)  # Коэффициент при первой переменной
-                        b = collected_expr.coeff(first_var)  # Коэффициент при второй переменной
-                        c = -equ.rhs
-                        logging.info(str(a))
-                        logging.info(str(b))
-                        logging.info(str(c))
-                    # Строим график
-                    plot_linear_equation(a, b, c)
-                    return
-                logging.info("Выбор пользователя: да, строить график.")
+                # Строим график для первого уравнения
                 eq = expressions[0]
-                if len(variables) > len(used_variables):
-                    print("Длина больше чем в sympy")
-                    for i in range(3):
-                        for variable in variables:
-                            if variable not in used_variables:
-                                print(variable)
-                                variables.remove(variable)
-                logging.info(str(variables))
-                logging.info(str(iter(variables)))
-                logging.info(str(next(iter(variables))))
-                first_var = next(iter(variables))
-                # Автоматически определяем первые две переменные
-                second_var = next(var for var in variables if var != first_var)
-                logging.info(str(first_var))
-                logging.info(str(second_var))
-                # Используя все свободные символы
-                collected_expr = eq.lhs.collect([first_var, second_var])
-                logging.info(str(collected_expr))
-                collected_expr_str = str(collected_expr)
-                collected_expr_str = collected_expr_str.replace(' ', '')
-                if str(lhs) == collected_expr_str:
-                    
-                    a = collected_expr.coeff(first_var)  # Коэффициент при первой переменной
-                    b = collected_expr.coeff(second_var)  # Коэффициент при второй переменной
-                    c = -eq.rhs
-                    logging.info(f"{a}, {b}, {c}")
+                vars_list = list(eq.free_symbols)
+
+                if len(vars_list) == 2:
+                    var1, var2 = vars_list[0], vars_list[1]
+                    plot_equation(eq, var1, var2)
+                    return
                 else:
-                    a = collected_expr.coeff(second_var)  # Коэффициент при первой переменной
-                    b = collected_expr.coeff(first_var)  # Коэффициент при второй переменной
-                    c = -eq.rhs
-                    logging.info(f"{a}, {b}, {c}")
-                # Строим график
-                plot_linear_equation(a, b, c)
-                return
+                    window.label_system_of_equations.setText("Невозможно построить 2D-график (переменных больше двух).")
+                    return
             else:
                 logging.info("Выбор пользователя: нет, график не нужен.")
+
         
         # Решаем систему уравнений
         solution = solve(expressions, used_variables)

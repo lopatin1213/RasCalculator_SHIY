@@ -61,7 +61,69 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
 
 
 def plot_equation(eq, var1, var2):
+
     try:
+        def has_odz(expr, var):
+            """
+            Проверяет, есть ли у выражения ограничения на область допустимых значений (ОДЗ).
+            Если есть - лучше рисовать через plot_implicit.
+            """
+            # 1. Проверяем наличие нелинейных функций с ограничениями (log, sqrt, asin, acos)
+            # В SymPy log и ln — одно и то же.
+            if expr.has(log) or expr.has(sqrt) or expr.has(asin) or expr.has(acos):
+                return True
+
+            # 2. Проверяем, есть ли переменная в знаменателе (деление на ноль)
+            numer, denom = expr.as_numer_denom()
+            if var in denom.free_symbols:
+                return True
+
+            return False
+
+        # ================================
+        # Добавляем поддержку Ctrl+ / Ctrl- для зума
+        # ================================
+        def zoom_key_handler(event):
+            # Проверяем, что нажатие произошло на оси и это сочетание с Ctrl
+            if event.inaxes != ax:
+                return
+
+            # Коэффициент масштабирования (1.2 = 120%, 0.8 = 80%)
+            scale_factor = 1.2
+
+            # Получаем текущие границы
+            cur_xlim = ax.get_xlim()
+            cur_ylim = ax.get_ylim()
+
+            # Вычисляем центр текущего обзора
+            x_center = (cur_xlim[0] + cur_xlim[1]) / 2
+            y_center = (cur_ylim[0] + cur_ylim[1]) / 2
+
+            # Длина текущего диапазона
+            cur_xrange = cur_xlim[1] - cur_xlim[0]
+            cur_yrange = cur_ylim[1] - cur_ylim[0]
+            #print(event.key)
+            # Если нажато Ctrl + (или Ctrl + =) — приближаем
+            if event.key == 'ctrl+plus' or event.key == 'ctrl+equal' or event.key == 'ctrl+=' or event.key == 'ctrl++':
+                new_xrange = cur_xrange / scale_factor
+                new_yrange = cur_yrange / scale_factor
+            # Если нажато Ctrl - — отдаляем
+            elif event.key == 'ctrl+minus' or event.key == 'ctrl+-':
+                new_xrange = cur_xrange * scale_factor
+                new_yrange = cur_yrange * scale_factor
+            else:
+                return  # Если нажата другая клавиша, ничего не делаем
+
+            # Устанавливаем новые границы, центрируя обзор
+            ax.set_xlim([x_center - new_xrange / 2, x_center + new_xrange / 2])
+            ax.set_ylim([y_center - new_yrange / 2, y_center + new_yrange / 2])
+
+            # Принудительно перерисовываем график
+            event.canvas.draw_idle()
+
+        # Подключаем обработчик к фигуре
+
+        # ================================
         expr = eq.lhs - eq.rhs
         vars_list = sorted(eq.free_symbols, key=lambda s: str(s))
         var1, var2 = vars_list[0], vars_list[1]
@@ -79,38 +141,102 @@ def plot_equation(eq, var1, var2):
             y_intercepts = [float(s) for s in y_sol if s.is_real]
         except Exception:
             pass
-
-        # === 2. Увеличиваем разрешение для гладкости (было 500, стало 1000) ===
         limit = 1000
-        x_vals = np.linspace(-limit, limit, 8000)
-        y_vals = np.linspace(-limit, limit, 8000)
-        X, Y = np.meshgrid(x_vals, y_vals)
+        # === 2. Увеличиваем разрешение для гладкости (было 500, стало 1000) ===
+        if has_odz(expr, var1):
+            from sympy.plotting import plot_implicit
+            p = plot_implicit(eq, (var1, -100, 100), (var2, -100, 100), show=False, n=1300, depth=9)
 
-        f = lambdify((var1, var2), expr, modules='numpy')
-        Z = f(X, Y)
-        Z = np.where(np.abs(Z) > 1e6, np.nan, Z)
-        Z[~np.isfinite(Z)] = np.nan
-        fig, ax = plt.subplots()
-        ax.contour(X, Y, Z, levels=[0], colors='blue', linewidths=2)
+            p.process_series()  # Отрисовываем линию
+            ax = p.ax
+            fig = p.fig
+            fig.canvas.mpl_connect('key_press_event', zoom_key_handler)
+            x_coords_str = ", ".join([f"({x:.2f}, 0)" for x in x_intercepts]) if x_intercepts else "Нет"
+            y_coords_str = ", ".join([f"(0, {y:.2f})" for y in y_intercepts]) if y_intercepts else "Нет"
 
-        # Оси X и Y
-        ax.axhline(0, color='black', linewidth=1)
-        ax.axvline(0, color='black', linewidth=1)
+            # Три пустые линии для легенды (они не видны на графике, но создают текст в легенде)
+            ax.plot([], [], ' ', label=f"${latex(eq)}$")  # Красивое уравнение через LaTeX
+            ax.plot([], [], ' ', label=f"Пересечения с X: {x_coords_str}")  # Текст про X
+            ax.plot([], [], ' ', label=f"Пересечения с Y: {y_coords_str}")  # Текст про Y
 
-        # Точки пересечения (теперь они не вызовут ошибку, если не найдутся)
-        for x in x_intercepts:
-            ax.scatter(x, 0, s=60, color='red', marker='o', zorder=5)
-        for y in y_intercepts:
-            ax.scatter(0, y, s=60, color='blue', marker='o', zorder=5)
+            # === ДОБАВЛЯЕМ ТОЛЩИНУ ЛИНИИ ===
+            patches = ax.patches
 
-        # Подписи осей строго по переменным
-        ax.set_xlabel(str(var1))
-        ax.set_ylabel(str(var2))
-        ax.grid(True, linestyle='--', alpha=0.7)
-        ax.set_xlim(-10, 10)
-        ax.set_ylim(-10, 10)
+            for patch in patches:
+                # Устанавливаем толщину границы (в пунктах, например 4)
+                patch.set_linewidth(2)
 
-        plt.show()
+                # ================================
+
+            # Дальше твой код с точками и оформлением...
+            try:
+                x_intercepts, y_intercepts = [], []
+                try:
+                    x_sol = solve(expr.subs(var2, 0), var1)
+                    x_intercepts = [float(s) for s in x_sol if s.is_real]
+                    for x in x_intercepts: ax.scatter(x, 0, s=60, color='red', marker='o', zorder=5)
+                except:
+                    pass
+                try:
+                    y_sol = solve(expr.subs(var1, 0), var2)
+                    y_intercepts = [float(s) for s in y_sol if s.is_real]
+                    for y in y_intercepts: ax.scatter(0, y, s=60, color='blue', marker='o', zorder=5)
+                except:
+                    pass
+
+                ax.axhline(0, color='black', linewidth=1)
+                ax.axvline(0, color='black', linewidth=1)
+                ax.set_xlim(-20, 20)
+                ax.set_ylim(-20, 20)
+                ax.set_xlabel(str(var1))
+                ax.set_ylabel(str(var2))
+                ax.legend()
+                ax.set_autoscale_on(False)
+                ax.grid(True, linestyle='--', alpha=0.7)
+            except Exception as e:
+                logging.warning(f"Ошибка при добавлении оформления на p.ax: {e}")
+
+            p.fig.tight_layout()
+            p.plt.show()
+            return
+        else:
+
+            x_vals = np.linspace(-limit, limit, 10000)
+            y_vals = np.linspace(-limit, limit, 10000)
+            y_vals[~np.isfinite(y_vals)] = np.nan
+            X, Y = np.meshgrid(x_vals, y_vals)
+            f = lambdify((var1, var2), expr, modules='numpy')
+            #print(x_vals, y_vals, X, Y, f, sep='\n<------------------------------->\n')
+            Z = f(X, Y)
+            #print(Z)
+            fig, ax = plt.subplots()
+            x_coords_str = ", ".join([f"({x:.2f}, 0)" for x in x_intercepts]) if x_intercepts else "Нет"
+            y_coords_str = ", ".join([f"(0, {y:.2f})" for y in y_intercepts]) if y_intercepts else "Нет"
+            ax.contour(X, Y, Z, levels=[0], colors='blue', linewidths=2)
+
+            ax.plot([], [], ' ', label=f"Уравнение: ${latex(eq)}$")
+            fig.canvas.mpl_connect('key_press_event', zoom_key_handler)
+
+            # Оси X и Y
+            ax.axhline(0, color='black', linewidth=1)
+            ax.axvline(0, color='black', linewidth=1)
+
+            # Точки пересечения (теперь они не вызовут ошибку, если не найдутся)
+            ax.scatter([x for x in x_intercepts], [0] * len(x_intercepts), s=60, color='red', marker='o', zorder=5,
+                       label=f"Пересечения с X: {x_coords_str}")
+
+            ax.scatter([0] * len(y_intercepts), [y for y in y_intercepts], s=60, color='blue', marker='o', zorder=5,
+                       label=f"Пересечения с Y: {y_coords_str}")
+
+            # Подписи осей строго по переменным
+            ax.set_xlabel(str(var1))
+            ax.set_ylabel(str(var2))
+            ax.grid(True, linestyle='--', alpha=0.7)
+            ax.set_xlim(-20.0, 20.0)
+            ax.set_ylim(-20.0, 20.0)
+            ax.legend()
+            ax.set_autoscale_on(False)
+            plt.show()
 
     except Exception as e1:
         logging.warning(f"Matplotlib contour не сработал: {e1}")

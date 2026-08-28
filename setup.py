@@ -56,13 +56,13 @@ options = {
     "build_exe": {
         
         "includes": [],                      # Дополнительные модули, если нужны
-        "include_files": ["import_data.ui","calculator.ico", "version.txt", 'error_box.ui', 'instruction.ui', 'preferences.txt', 'cur_version.txt', "logs.log"],# Добавляем файл version.txt
+        "include_files": ["LICENSE", "import_data.ui","calculator.ico", "version.txt", 'error_box.ui', 'instruction.ui', 'preferences.txt', 'cur_version.txt', "logs.log"],# Добавляем файл version.txt
         "optimize": 2,
         "excludes": ["PyQt5", "tkinter", "scipy", "kivy", "kivymd"]
          # Попробуйте добавить этот параметр# Уровень оптимизации байт-кода (может уменьшить размер)
     },
     "bdist_msi": {
-        "upgrade_code": "{16667666-6667-6666-6666-666666666666}",  # Уникальный идентификатор обновления
+        "upgrade_code": "{17667666-6667-6666-6666-666666666666}",  # Уникальный идентификатор обновления
         "add_to_path": False,  # Не добавлять в PATH
         'initial_target_dir': 'C:\\Antonrasrab',
         

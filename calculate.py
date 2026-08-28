@@ -11,12 +11,14 @@ def replace_caret_with_power(expression):
 
 
 def replace_z_t(expression):
-    """Заменяет запятую на точку в числе."""
-    return expression.replace(',', '.')
+    def repl(match):
+        return match.group(0).replace(',', '.')
+    # Паттерн: цифра, запятая, цифра (возможно с дополнительными цифрами)
+    pattern = r'(\d+),(\d+)'
+    return re.sub(pattern, repl, expression)
 
 
 
-from equations import insert_multiplication_signs
 
 
 def nth_root(number, n):
@@ -25,6 +27,7 @@ def nth_root(number, n):
         raise ValueError("Корень четной степени из отрицательного числа невозможен.")
     return number ** (1 / n)
 
+from equations import insert_multiplication_signs
 
 def calculate(windows):
     try:
@@ -46,8 +49,7 @@ def calculate(windows):
             final_result = addings.dynamic_precision(result)
             mantissa, exponent = final_result.split("E")
             final_result = "{}*10^{}".format(float(mantissa), int(exponent))
-            addings.add_to_history(expression, final_result)
-            
+
             windows.label.setText(f"{final_result}")
             
             
@@ -65,14 +67,13 @@ def calculate(windows):
             logging.info(result)
             logging.info(result)
             logging.info(type(result))
-        
+
+        # Применение динамической точности
         # Применение динамической точности
         final_result = addings.format_number(addings.dynamic_precision(result))
         logging.info(final_result)
         windows.label.setText(f"{final_result}")
-        addings.add_to_history(expression, str(final_result))
-        addings.update_history()
-        
+
         
     
     except ZeroDivisionError:

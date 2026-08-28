@@ -1,0 +1,3 @@
+2026-08-28 17:22:33,001 - DEBUG - Starting new HTTPS connection (1): rascalculator.alwaysdata.net:443
+2026-08-28 17:22:37,392 - DEBUG - https://rascalculator.alwaysdata.net:443 "GET /send_errors/ HTTP/1.1" 405 29
+2026-08-28 17:22:37,486 - DEBUG - https://rascalculator.alwaysdata.net:443 "POST /send_errors/ HTTP/1.1" 400 22

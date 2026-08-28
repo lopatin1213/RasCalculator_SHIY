@@ -115,7 +115,7 @@ def solve_system_of_equations(window):
                                             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
             if response == QMessageBox.StandardButton.Yes:
-                plt = AdoptPlot(equations_str, limit=1000, n=5000)
+                plt = AdoptPlot(equations_str, limit=300, n=10000)
             else:
                 logging.info("Выбор пользователя: нет, график не нужен.")
 
@@ -153,38 +153,44 @@ def solve_system_of_equations(window):
 
                 window.label_system_of_equations.setText(f"Решение системы уравнений:\n{formatted_result}")
             elif solution.has(ImageSet):
-                # 2. Достаем лямбда-выражение (функцию)
-                lambda_expr = solution.lamda
-                # Lambda(n, n*pi)
+                for sol in solution:
+                    for so in sol:
+                        for s in so.args:
 
-                # 3. Достаем саму формулу (n*pi)
-                formula = lambda_expr.expr
-                # n*pi
+                            # 2. Достаем лямбда-выражение (функцию)
+                            lambda_expr = s.lamda
+                            # Lambda(n, n*pi)
 
-                # 4. Достаем переменную, которая крутится в формуле (n)
-                variable = lambda_expr.variables[0]
-                # n
+                            # 3. Достаем саму формулу (n*pi)
+                            formula = lambda_expr.expr
+                            # n*pi
 
-                # 5. Достаем базовое множество (Integers)
-                base_set = solution.base_sets[0]
-                # Integers
-                window.label_system_of_equations.setText(f"x = {formula}, где {variable} — {base_set}")
+                            # 4. Достаем переменную, которая крутится в формуле (n)
+                            variable = lambda_expr.variables[0]
+                            # n
+
+                            # 5. Достаем базовое множество (Integers)
+                            base_set = s.base_sets[0]
+                            # Integers
+                            window.label_system_of_equations.setText(f"x = {formula}, где {variable} — {base_set}")
             else:
-                core_equation = solution.condition.lhs - solution.condition.rhs
+                for sol in solution:
+                    for s in sol:
+                        core_equation = s.condition.lhs - s.condition.rhs
 
-                # Проверяем, в каких числах искали
-                if solution.base_set == S.Reals:
-                    area_text = "действительных числах"
-                elif solution.base_set == S.Complexes:
-                    area_text = "комплексных числах"
-                else:
-                    area_text = str(solution.base_set)
+                        # Проверяем, в каких числах искали
+                        if s.base_set == S.Reals:
+                            area_text = "действительных числах"
+                        elif s.base_set == S.Complexes:
+                            area_text = "комплексных числах"
+                        else:
+                            area_text = str(s.base_set)
 
-                # Формируем понятное сообщение для пользователя
-                window.label_system_of_equations.setText(
-                    f"Уравнение {core_equation} = 0 не имеет аналитического решения "
-                    f"в {area_text}. Ответ может быть найден только численно."
-                )
+                        # Формируем понятное сообщение для пользователя
+                        window.label_system_of_equations.setText(
+                            f"Уравнение {core_equation} = 0 не имеет аналитического решения "
+                            f"в {area_text}. Ответ может быть найден только численно."
+                        )
         else:
             # Если решение не найдено
             window.label_system_of_equations.setText("Решение не найдено.")

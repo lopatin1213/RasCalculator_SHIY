@@ -54,6 +54,8 @@ def insert_multiplication_signs(expr: str, extra_functions=None) -> str:
     expr = re.sub(rf'({LETTER})(?={LETTER})', r'\1*', expr)  # a*b*c, а*я
     expr = re.sub(rf'({LETTER_DIGIT})(\()', r'\1*\2', expr)  # a(, 3(, я(
     expr = re.sub(rf'(\))({LETTER_DIGIT}\()', r'\1*\2', expr)  # )a, )(, )я
+   # Вставляем * между цифрой и защищённым именем (константы, переменные)
+    expr = re.sub(rf'(\d)(\ue000\d+\ue001)', r'\1*\2', expr)
 
     # === ШАГ 3: Возвращаем защищённые имена на место ===
     for placeholder, name in protected.items():
